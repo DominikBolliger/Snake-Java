@@ -9,7 +9,6 @@ public class Food {
     private int height;
     private int x;
     private int y;
-    private Color color;
     private boolean visible;
 
 
@@ -17,20 +16,14 @@ public class Food {
         this.width = 10;
         this.height = 10;
         getPos();
-        this.color = Color.valueOf(getColor());
         this.visible = true;
     }
 
     public void drawFood(GraphicsContext ctx) {
         if (visible) {
-            ctx.setFill(color);
+            ctx.setFill(Color.YELLOW);
             ctx.fillRect(x, y, width, height);
         }
-    }
-
-    private String getColor() {
-        Random random = new Random();
-        return String.format("#%06x", random.nextInt(256 * 256 * 256));
     }
 
     public void getPos() {

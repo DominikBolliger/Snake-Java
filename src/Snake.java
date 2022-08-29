@@ -3,6 +3,10 @@ import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.KeyEvent;
+import javafx.stage.Window;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class Snake extends Thread {
 
@@ -11,6 +15,8 @@ public class Snake extends Thread {
     private SnakeHead snakeHead;
     private Scene scene;
     private Food food;
+    private List<SnakeBody> snakeBody;
+    private boolean moved;
 
     public Snake(Canvas canvas, GraphicsContext ctx, Scene scene) {
         this.canvas = canvas;
@@ -18,6 +24,8 @@ public class Snake extends Thread {
         this.snakeHead = new SnakeHead();
         this.scene = scene;
         this.food = new Food();
+        this.snakeBody = new ArrayList();
+        this.moved = false;
     }
 
     public void run() {
@@ -30,20 +38,38 @@ public class Snake extends Thread {
                 e.printStackTrace();
             }
         }
-
     }
 
     public void update() {
         getKeyPressed();
-        snakeHead.moveSnake();
-        checkWallCollision();
         checkFoodCollision();
+        updateSnakeBody();
+        snakeHead.moveSnakeHead();
+        checkBodyCollision();
+        checkWallCollision();
+
+    }
+
+    private void updateSnakeBody() {
+        for (int i = snakeBody.size() - 1; i >= 0; i--) {
+            if (i == 0) {
+                snakeBody.get(i).setX(snakeHead.getX());
+                snakeBody.get(i).setY(snakeHead.getY());
+            } else {
+                snakeBody.get(i).setX(snakeBody.get(i - 1).getX());
+                snakeBody.get(i).setY(snakeBody.get(i - 1).getY());
+            }
+        }
     }
 
     public void draw() {
         clearCanvas();
-        snakeHead.drawSnake(ctx);
+        for (SnakeBody body : snakeBody) {
+            body.drawSnakeBody(ctx);
+        }
         food.drawFood(ctx);
+        snakeHead.drawSnakeHead(ctx);
+        moved = false;
     }
 
     private void checkWallCollision() {
@@ -61,13 +87,30 @@ public class Snake extends Thread {
     private void checkFoodCollision() {
         if (snakeHead.getX() == food.getX() && snakeHead.getY() == food.getY()) {
             food.getPos();
+            if (snakeBody.size() == 0) {
+                snakeBody.add(new SnakeBody(snakeHead.getX(), snakeHead.getY()));
+            } else {
+                snakeBody.add(new SnakeBody(snakeBody.get(snakeBody.size() - 1).getX(), snakeBody.get(snakeBody.size() - 1).getY()));
+            }
         }
     }
 
+    private void checkBodyCollision() {
+        for (SnakeBody body:snakeBody) {
+            if (snakeHead.getX() == body.getX() && snakeHead.getY() == body.getY()){
+                stop();
+            }
+        }
+    }
+
+    public Snake setBody(SnakeBody body) {
+        this.snakeBody.add(body);
+        return this;
+    }
+
     private void getKeyPressed() {
-        scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
-            @Override
-            public void handle(KeyEvent event) {
+        scene.setOnKeyPressed(event -> {
+            if (!moved) {
                 switch (event.getCode()) {
                     case A:
                         if (!snakeHead.isMoveHori()) {
@@ -75,6 +118,7 @@ public class Snake extends Thread {
                             snakeHead.setYChange(0);
                             snakeHead.setMoveVerti(false);
                             snakeHead.setMoveHori(true);
+                            moved = true;
                         }
                         break;
                     case D:
@@ -83,6 +127,7 @@ public class Snake extends Thread {
                             snakeHead.setYChange(0);
                             snakeHead.setMoveVerti(false);
                             snakeHead.setMoveHori(true);
+                            moved = true;
                         }
                         break;
                     case W:
@@ -91,6 +136,7 @@ public class Snake extends Thread {
                             snakeHead.setYChange(-10);
                             snakeHead.setMoveVerti(true);
                             snakeHead.setMoveHori(false);
+                            moved = true;
                         }
                         break;
                     case S:
@@ -99,8 +145,11 @@ public class Snake extends Thread {
                             snakeHead.setYChange(10);
                             snakeHead.setMoveVerti(true);
                             snakeHead.setMoveHori(false);
+                            moved = true;
                         }
                         break;
+                    case ESCAPE:
+                        System.exit(0);
                 }
             }
         });

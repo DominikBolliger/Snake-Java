@@ -13,8 +13,8 @@ public class SnakeHead {
     private boolean moveVerti;
 
     public SnakeHead() {
-        this.height = 10;
-        this.width = 10;
+        this.height = Init.SNAKEHEIGHT;
+        this.width = Init.SNAKEWIDTH;
         this.x = 100;
         this.y = 100  ;
         this.xChange = 10;
@@ -23,12 +23,12 @@ public class SnakeHead {
         this.moveVerti = false;
     }
 
-    public void drawSnake(GraphicsContext ctx) {
-        ctx.setFill(Color.GREEN);
+    public void drawSnakeHead(GraphicsContext ctx) {
+        ctx.setFill(Color.rgb(4, 100, 0));
         ctx.fillRect(x, y, width, height);
     }
 
-    public void moveSnake() {
+    public void moveSnakeHead() {
         x += xChange;
         y += yChange;
     }
